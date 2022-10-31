@@ -74,7 +74,9 @@ const usersHandler = (req, res) => User.find()
   .then((docs) => res.json(map(docs, ({ _id, username }) => ({ _id, username }))))
   .catch(errorHandler(res));
 
-const createExerciseHandler = (req, res) => new Exercise({
+const createExerciseHandler = async (req, res) =>{
+  const user = await User.findById(req.params._id).exec()
+  return new Exercise({
     _id: new mongoose.Types.ObjectId(),
     user: req.params._id,
     description: req.body.description,
@@ -82,11 +84,12 @@ const createExerciseHandler = (req, res) => new Exercise({
     date: date(req.body.date)
   })
   .save()
-  .then(({ user: { username }, _id, description, duration, date }) => 
-    res.json({ username, _id, description, duration, date: date.toDateString() })
+  .then(({ description, duration, date }) => 
+    res.json({ _id: user._id, username: user.username, description, duration, date: date.toDateString() })
   )
   .catch(errorHandler(res))
 
+}
 const exercisesHandler = (req, res) =>
   Exercise.find({ user: req.params._id })
     .populate('user', 'username')
