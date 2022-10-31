@@ -74,16 +74,14 @@ const usersHandler = (req, res) => User.find()
   .then((docs) => res.json(map(docs, ({ _id, username }) => ({ _id, username }))))
   .catch(errorHandler(res));
 
-const createExerciseHandler = (req, res) => User.findById(req.body[':_id'])
-  .then((user) => {
-    return new Exercise({
-      _id: new mongoose.Types.ObjectId(),
-      user: user._id,
-      description: req.body.description,
-      duration: req.body.duration,
-      date: date(req.body.date)
-    }).save()
-  }) 
+const createExerciseHandler = (req, res) => new Exercise({
+    _id: new mongoose.Types.ObjectId(),
+    user: req.params._id,
+    description: req.body.description,
+    duration: req.body.duration,
+    date: date(req.body.date)
+  })
+  .save()
   .then(({ user: { username }, _id, description, duration, date }) => 
     res.json({ username, _id, description, duration, date: date.toDateString() })
   )
